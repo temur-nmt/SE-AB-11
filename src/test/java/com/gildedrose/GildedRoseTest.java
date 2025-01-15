@@ -61,4 +61,58 @@ class GildedRoseTest {
 
         assertEquals(80 ,app.items[0].getQuality());
     }
+
+    // Refactoring Tests
+
+    // Sulfuras doesnt decrease in sellIn value
+    @Test
+    void sulfurasDoesntLooseSellIn() {
+        Item[] items = new Item[] {new Item ("Sulfuras, Hand of Ragnaros", 0, 80)};
+        GildedRose app = new GildedRose(items);
+
+        for (int i = 0; i < 100; i++) {
+            app.updateQuality();
+        }
+
+        assertEquals(0 ,app.items[0].getSellIn());
+    }
+
+    // same as brie
+    void backstageTicketsIncreaseInValue() {
+        Item[] items = new Item[] {new Item ("Backstage passes to a TAFKAL80ETC concert", 1, 0)};
+        GildedRose app = new GildedRose(items);
+        
+        for (int i = 0; i < 7; i++) {
+            app.updateQuality();
+        }
+
+        assertEquals(13 ,app.items[0].getQuality());
+    }
+
+    // quality caps at 50 for brie and backstage tickets
+    @Test
+    void qualityCapBackstageAndBrie() {
+        Item[] items = new Item[] {new Item ("Backstage passes to a TAFKAL80ETC concert", 100, 49), new Item("Aged Brie", 100, 49)};
+        GildedRose app = new GildedRose(items);
+        
+        for (int i = 0; i < 10; i++) {
+            app.updateQuality();
+        }
+
+        assertEquals(50 ,app.items[0].getQuality());
+        assertEquals(50 ,app.items[1].getQuality());
+    }
+
+    // backstage tickets loose all their value once sellIn < 0
+    @Test
+    void BackstageSellInBelowZero() {
+        Item[] items = new Item[] {new Item ("Backstage passes to a TAFKAL80ETC concert", 1, 100)};
+        GildedRose app = new GildedRose(items);
+        
+        for (int i = 0; i < 10; i++) {
+            app.updateQuality();
+        }
+
+        assertEquals(0 ,app.items[0].getQuality());
+    }
 }

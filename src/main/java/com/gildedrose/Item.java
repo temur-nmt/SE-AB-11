@@ -22,4 +22,8 @@ public class Item {
     public int getQuality() {
         return this.quality;
     }
+
+    public int getSellIn() {
+        return this.sellIn;
+    }
 }
