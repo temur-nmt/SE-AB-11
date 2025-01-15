@@ -9,57 +9,68 @@ public class GildedRose {
 
     public void updateQuality() {
         for (int i = 0; i < items.length; i++) {
-            if (!items[i].name.equals("Aged Brie")
-                    && !items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                if (items[i].quality > 0) {
-                    if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                        // neither aged brie, backstage passes, nor sulfuras loose quality
-                        items[i].quality = items[i].quality - 1;
-                    }
-                }
-            } else {
-                if (items[i].quality < 50) {
-                    items[i].quality = items[i].quality + 1;
+            // Store all reused values in easy to understand variables
+            int currentQuality = items[i].quality;
+            int currentSellIn = items[i].sellIn;
+            String currentName = items[i].name;
+            ItemType type = items[i].type;
 
-                    if (items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        // + 1
-                        if (items[i].sellIn < 11) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
-                        // + 2
-                        if (items[i].sellIn < 6) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
-                    }
-                }
-            }
-            // everything but sulfuras looses sellIn value
-            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                items[i].sellIn = items[i].sellIn - 1;
-            }
+            // structure code into blocks for each ItemType
+            /*
+             * Section the Code into blocks of items of different types.
+             * Inside the sections implement different Items based on unique behaviour (like having a quality cap, or a definite expiry date etc.).
+             * This way Items can be added afterwards without changing the structure of the existing code.
+             * Basic behaviour can be extracted while unuqie beahviour can be item specifid, this way we maintain the general to special principle.
+             */
+            currentSellIn--;
 
-            // sellIn < 0
-            if (items[i].sellIn < 0) {
-                if (!items[i].name.equals("Aged Brie")) {
-                    if (!items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (items[i].quality > 0) {
-                            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                                items[i].quality = items[i].quality - 1;
-                            }
+            if (type == ItemType.STATIC) {
+                if (currentName.equals("Sulfuras, Hand of Ragnaros")) {
+                    currentSellIn++;
+                }
+            } else if (type == ItemType.RIPING) {
+                if (currentName.equals("Aged Brie")) {
+                    if (currentQuality < 50) {
+                        int sellInLessThanZero = currentSellIn < 0 ? 2 : 1;
+                        if ((currentQuality + sellInLessThanZero) < 50) {
+                            currentQuality += sellInLessThanZero;
+                        } else {
+                            currentQuality = 50;
                         }
-                    } else { // backstage tickets loose all their value 
-                        items[i].quality = items[i].quality - items[i].quality;
                     }
                 } else {
-                    if (items[i].quality < 50) {
-                        items[i].quality = items[i].quality + 1;
+                    // base case
+                    currentQuality++;
+                }
+            } else if (type == ItemType.EXPIRING) {
+                if (currentName.equals("Backstage passes to a TAFKAL80ETC concert")) {
+                    if (currentSellIn < 0) {
+                        currentQuality = 0;
+                    } else {
+                        // backstage tickets are useless after the concert
+                        if (currentQuality < 50) {
+                            currentQuality++;
+                            int sellInLessThanEleven = currentSellIn < 11 ? 1 : 0;
+                            int sellInLessThanSix = currentSellIn < 6 ? 1 : 0;
+                            if (currentQuality + sellInLessThanEleven + sellInLessThanSix < 50) {
+                                currentQuality = currentQuality + sellInLessThanEleven + sellInLessThanSix;
+                            } else {
+                                currentQuality = 50;
+                            }
+                        }
+                    }
+                } else {
+                    // base case
+                    currentQuality--;
+
+                    if (currentSellIn < 0) {
+                        currentQuality--;
                     }
                 }
             }
+            // enact changes
+            items[i].quality = currentQuality;
+            items[i].sellIn = currentSellIn;
         }
     }
 }
